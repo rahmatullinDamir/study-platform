@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import rahmatullin.dev.studyplatform.models.enums.UserRoles;
 
 @Entity
 @Data
@@ -22,4 +23,11 @@ public class User {
 
     @Column(nullable = false)
     private String hashPassword;
+
+    private String firstName;
+    private String lastName;
+
+    @Enumerated(value = EnumType.STRING)
+    private UserRoles role;
+
 }
