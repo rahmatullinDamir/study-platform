@@ -23,7 +23,10 @@ public class RegistrationForm {
     @Pattern(regexp = "(?=.*[@$!%*?&]).*", message = "Пароль должен содержать хотя бы один специальный символ")
     private String password;
 
+    @NotBlank(message = "Имя не может быть пустым")
     private String firstName;
+    @NotBlank(message = "Фамилия не может быть пустой")
     private String lastName;
+    @NotBlank(message = "Роль не может быть пустым")
     private UserRoles role;
 }
