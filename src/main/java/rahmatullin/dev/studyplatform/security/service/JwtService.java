@@ -52,6 +52,21 @@ public class JwtService {
                 .orElse(null);
     }
 
+    public Long getUserId(String token) {
+        return Optional.of(jwtVerifier.verify(token))
+                .map(decodedJWT -> decodedJWT.getClaim("userId").asLong())
+                .orElse(null);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            jwtVerifier.verify(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public void revokeRefreshToken(String username) {
         if (!tokenRepository.existsById(username)) {
             throw new InvalidRefreshTokenException("Refresh Token не найден для пользователя: " + username);
