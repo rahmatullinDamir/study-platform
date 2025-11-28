@@ -3,7 +3,7 @@ spring:
     name: study-platform
   datasource:
     url: ${POSTGRES_URL}
-    username: ${POSTGRES_USERNAME}
+    username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
@@ -11,7 +11,8 @@ spring:
     show-sql: true
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST}
+      host: ${SPRING_REDIS_HOST}
+      port: ${SPRING_REDIS_PORT}
 
 
 server:
