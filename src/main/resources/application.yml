@@ -3,13 +3,31 @@ spring:
     name: study-platform
   datasource:
     url: ${POSTGRES_URL}
-    username: ${POSTGRES_USERNAME}
+    username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: ${SPRING_REDIS_PORT}
+
 
 server:
   port: 8080
   address: 0.0.0.0
+
+jwt:
+  secret: ${JWT_SECRET}
+  access:
+    expiration: ${JWT_ACCESS_EXPIRATION}
+  refresh:
+    expiration: ${JWT_REFRESH_EXPIRATION}
+
+springdoc:
+  group-configs:
+    - group: auth
+      paths-to-match: /api/**
+      packages-to-scan: rahmatullin.dev.studyplatform
