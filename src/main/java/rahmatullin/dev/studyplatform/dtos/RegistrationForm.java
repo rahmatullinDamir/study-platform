@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import rahmatullin.dev.studyplatform.models.enums.UserRoles;
 
 @Data
 @Accessors(chain = true)
@@ -21,4 +22,8 @@ public class RegistrationForm {
     @Pattern(regexp = "(?=.*\\d).*", message = "Пароль должен содержать хотя бы одну цифру")
     @Pattern(regexp = "(?=.*[@$!%*?&]).*", message = "Пароль должен содержать хотя бы один специальный символ")
     private String password;
+
+    private String firstName;
+    private String lastName;
+    private UserRoles role;
 }
