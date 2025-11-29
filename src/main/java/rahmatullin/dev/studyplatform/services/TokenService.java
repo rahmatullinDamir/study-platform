@@ -12,6 +12,7 @@ import rahmatullin.dev.studyplatform.exceptions.InvalidRefreshTokenException;
 import rahmatullin.dev.studyplatform.exceptions.UserNotFoundException;
 import rahmatullin.dev.studyplatform.mapper.UserMapper;
 import rahmatullin.dev.studyplatform.models.User;
+import rahmatullin.dev.studyplatform.models.enums.UserRoles;
 import rahmatullin.dev.studyplatform.repositories.UserRepository;
 import rahmatullin.dev.studyplatform.security.service.JwtService;
 
@@ -27,14 +28,15 @@ public class TokenService {
 
     public ApiResponse<TokenResponse> refreshTokens(String refreshToken) {
         String email = jwtService.getEmail(refreshToken);
-        userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
         jwtService.equalsTokens(email, refreshToken);
 
         Long userId = userRepository.findIdByEmail(email);
+        UserRoles role = user.getRole();
 
-        String newAccessToken = jwtService.generateAccessToken(email, userId);
-        String newRefreshToken = jwtService.generateRefreshToken(email, userId);
+        String newAccessToken = jwtService.generateAccessToken(email, userId, role);
+        String newRefreshToken = jwtService.generateRefreshToken(email, userId, role);
 
         jwtService.saveRefreshToken(email, newRefreshToken);
 
@@ -44,9 +46,11 @@ public class TokenService {
 
     public void setTokens(String email, HttpServletResponse response) {
         Long userId = userRepository.findIdByEmail(email);
-
-        String accessToken = jwtService.generateAccessToken(email, userId);
-        String refreshToken = jwtService.generateRefreshToken(email, userId);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
+        UserRoles role = user.getRole();
+        String accessToken = jwtService.generateAccessToken(email, userId, role);
+        String refreshToken = jwtService.generateRefreshToken(email, userId, role);
 
         Cookie accessCookie = new Cookie("access_token", accessToken);
         accessCookie.setHttpOnly(true);
