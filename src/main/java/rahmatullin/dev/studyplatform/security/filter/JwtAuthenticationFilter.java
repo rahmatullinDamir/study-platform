@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Long userId = jwtService.getUserId(accessToken);
                 String email = jwtService.getEmail(accessToken);
+                String role = jwtService.getUserRole(accessToken);
                 
                 if (userId != null && email != null) {
                     // Создаем wrapper для добавления заголовка X-User-Id
@@ -46,8 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                         );
+
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     
                     filterChain.doFilter(wrappedRequest, response);
