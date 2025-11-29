@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Long userId = jwtService.getUserId(accessToken);
                 String email = jwtService.getEmail(accessToken);
+
                 String role = jwtService.getUserRole(accessToken);
                 
                 if (userId != null && email != null) {
@@ -42,9 +43,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     JwtRequestWrapper wrappedRequest = new JwtRequestWrapper(request);
                     wrappedRequest.addHeader("X-User-Id", userId.toString());
                     
-                    // Устанавливаем аутентификацию в SecurityContext
-                    UsernamePasswordAuthenticationToken authentication = 
-                        new UsernamePasswordAuthenticationToken(
+                    // Преобразуем роль в формат Spring Security (ROLE_TEACHER, ROLE_STUDENT)
+                    // hasRole() в Spring Security автоматически добавляет префикс ROLE_, поэтому добавляем его здесь
+                    UsernamePasswordAuthenticationToken authentication;
+                    
+                    if (role != null && !role.isEmpty()) {
+                        String authority = "ROLE_" + role;
+                        // Устанавливаем аутентификацию в SecurityContext с правильной ролью
+                        authentication = new UsernamePasswordAuthenticationToken(
                             email,
                             null,
                             Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
@@ -52,6 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                     filterChain.doFilter(wrappedRequest, response);
                     return;
                 }
