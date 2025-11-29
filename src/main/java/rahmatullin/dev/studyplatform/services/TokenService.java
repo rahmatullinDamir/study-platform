@@ -27,14 +27,15 @@ public class TokenService {
 
     public ApiResponse<TokenResponse> refreshTokens(String refreshToken) {
         String email = jwtService.getEmail(refreshToken);
-        userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
         jwtService.equalsTokens(email, refreshToken);
 
-        Long userId = userRepository.findIdByEmail(email);
+        Long userId = user.getId();
+        String role = user.getRole().name();
 
-        String newAccessToken = jwtService.generateAccessToken(email, userId);
-        String newRefreshToken = jwtService.generateRefreshToken(email, userId);
+        String newAccessToken = jwtService.generateAccessToken(email, userId, role);
+        String newRefreshToken = jwtService.generateRefreshToken(email, userId, role);
 
         jwtService.saveRefreshToken(email, newRefreshToken);
 
@@ -43,10 +44,14 @@ public class TokenService {
     }
 
     public void setTokens(String email, HttpServletResponse response) {
-        Long userId = userRepository.findIdByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
+        
+        Long userId = user.getId();
+        String role = user.getRole().name();
 
-        String accessToken = jwtService.generateAccessToken(email, userId);
-        String refreshToken = jwtService.generateRefreshToken(email, userId);
+        String accessToken = jwtService.generateAccessToken(email, userId, role);
+        String refreshToken = jwtService.generateRefreshToken(email, userId, role);
 
         Cookie accessCookie = new Cookie("access_token", accessToken);
         accessCookie.setHttpOnly(true);

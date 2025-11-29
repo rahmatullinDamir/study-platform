@@ -6,15 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import rahmatullin.dev.studyplatform.dtos.ApiResponse;
-import rahmatullin.dev.studyplatform.exceptions.InvalidRefreshTokenException;
-import rahmatullin.dev.studyplatform.exceptions.PasswordMismatchException;
-import rahmatullin.dev.studyplatform.exceptions.UserAlreadyExistException;
-import rahmatullin.dev.studyplatform.exceptions.UserNotFoundException;
+import rahmatullin.dev.studyplatform.exceptions.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +47,47 @@ public class GlobalExceptionHandler {
         logger.warn("User already exists: {}", e.getMessage());
         ApiResponse<Map<String, String>> response = new ApiResponse<>(
                 "Ошибка регистрации пользователя",
+                errorDetails
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CourseAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleCourseAlreadyExistException(CourseAlreadyExistsException e) {
+        Map<String, String> errorDetails = new HashMap<>();
+        errorDetails.put("errorDetails", e.getMessage());
+
+        logger.warn("Course already exists: {}", e.getMessage());
+        ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                "Ошибка создания курса",
+                errorDetails
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleCourseNotFoundException(CourseNotFoundException e) {
+        Map<String, String> errorDetails = new HashMap<>();
+        errorDetails.put("errorDetails", e.getMessage());
+
+        logger.warn("Course not found: {}", e.getMessage());
+        ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                "Курс с таким id не найден",
+                errorDetails
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(NotPermitedToCourseException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleNotPermitedToCourseException(NotPermitedToCourseException e) {
+        Map<String, String> errorDetails = new HashMap<>();
+        errorDetails.put("errorDetails", e.getMessage());
+
+        logger.warn("Haven't permissions to this course: {}", e.getMessage());
+        ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                "У вас нет прав для работы с этим курсом",
                 errorDetails
         );
 
@@ -90,6 +129,13 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleAuthMissing(
+            AuthenticationCredentialsNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse<>("Требуется аутентификация", null));
     }
 
     @ExceptionHandler(JWTVerificationException.class)

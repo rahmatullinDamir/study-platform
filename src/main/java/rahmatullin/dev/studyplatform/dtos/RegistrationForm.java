@@ -1,9 +1,6 @@
 package rahmatullin.dev.studyplatform.dtos;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import rahmatullin.dev.studyplatform.models.enums.UserRoles;
@@ -27,6 +24,6 @@ public class RegistrationForm {
     private String firstName;
     @NotBlank(message = "Фамилия не может быть пустой")
     private String lastName;
-    @NotBlank(message = "Роль не может быть пустым")
+    @NotNull(message = "Роль не может быть пустым")
     private UserRoles role;
 }

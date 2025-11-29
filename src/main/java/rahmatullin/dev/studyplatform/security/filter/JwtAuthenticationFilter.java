@@ -35,21 +35,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Long userId = jwtService.getUserId(accessToken);
                 String email = jwtService.getEmail(accessToken);
+                String role = jwtService.getRole(accessToken);
                 
                 if (userId != null && email != null) {
                     // Создаем wrapper для добавления заголовка X-User-Id
                     JwtRequestWrapper wrappedRequest = new JwtRequestWrapper(request);
                     wrappedRequest.addHeader("X-User-Id", userId.toString());
                     
-                    // Устанавливаем аутентификацию в SecurityContext
-                    UsernamePasswordAuthenticationToken authentication = 
-                        new UsernamePasswordAuthenticationToken(
+                    // Преобразуем роль в формат Spring Security (ROLE_TEACHER, ROLE_STUDENT)
+                    // hasRole() в Spring Security автоматически добавляет префикс ROLE_, поэтому добавляем его здесь
+                    UsernamePasswordAuthenticationToken authentication;
+                    
+                    if (role != null && !role.isEmpty()) {
+                        String authority = "ROLE_" + role;
+                        // Устанавливаем аутентификацию в SecurityContext с правильной ролью
+                        authentication = new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                            Collections.singletonList(new SimpleGrantedAuthority(authority))
                         );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    } else {
+                        // Если роль отсутствует, устанавливаем аутентификацию без роли
+                        // @PreAuthorize отклонит запрос с 403, но это лучше, чем AuthenticationCredentialsNotFoundException
+                        authentication = new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            Collections.emptyList()
+                        );
+                    }
                     
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                     filterChain.doFilter(wrappedRequest, response);
                     return;
                 }

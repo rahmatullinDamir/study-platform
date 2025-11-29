@@ -30,18 +30,19 @@ public class JwtService {
     private final RefreshTokenRepository tokenRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    public String generateRefreshToken(String email, Long userId) {
-        return generateToken(email, userId, refreshExpiration);
+    public String generateRefreshToken(String email, Long userId, String role) {
+        return generateToken(email, userId, role, refreshExpiration);
     }
 
-    public String generateAccessToken(String email, Long userId) {
-        return generateToken(email, userId, accessExpiration);
+    public String generateAccessToken(String email, Long userId, String role) {
+        return generateToken(email, userId, role, accessExpiration);
     }
 
-    private String generateToken(String email, Long userId, long expiration) {
+    private String generateToken(String email, Long userId, String role, long expiration) {
         return JWT.create()
                 .withSubject(email)
                 .withClaim("userId", userId)
+                .withClaim("role", role)
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                 .sign(algorithm);
     }
@@ -56,6 +57,19 @@ public class JwtService {
         return Optional.of(jwtVerifier.verify(token))
                 .map(decodedJWT -> decodedJWT.getClaim("userId").asLong())
                 .orElse(null);
+    }
+
+    public String getRole(String token) {
+        try {
+            return Optional.of(jwtVerifier.verify(token))
+                    .map(decodedJWT -> {
+                        var claim = decodedJWT.getClaim("role");
+                        return claim.isNull() ? null : claim.asString();
+                    })
+                    .orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public boolean validateToken(String token) {
