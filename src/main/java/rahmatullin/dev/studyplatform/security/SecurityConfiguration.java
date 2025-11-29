@@ -18,7 +18,7 @@ import rahmatullin.dev.studyplatform.security.filter.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     @Bean
