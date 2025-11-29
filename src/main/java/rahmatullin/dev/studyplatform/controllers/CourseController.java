@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rahmatullin.dev.studyplatform.dtos.*;
-import rahmatullin.dev.studyplatform.models.User;
 import rahmatullin.dev.studyplatform.services.CourseService;
 
 import java.util.List;
@@ -21,16 +20,28 @@ public class CourseController {
     private final CourseService courseService;
 
 
+
+    @GetMapping("/{courseId}")
+    public ResponseEntity<ApiResponse<CourseDetailsDto>> getCourse(@PathVariable String courseId, HttpServletRequest request) {
+        String userIdHeader = request.getHeader("X-User-Id");
+        Long userId = Long.parseLong(userIdHeader);
+
+        CourseDetailsDto courseDto = courseService.getCourse(courseId, userId);
+        ApiResponse<CourseDetailsDto> apiResponse = new ApiResponse<>("Курс успешно получен!",
+                courseDto);
+        return ResponseEntity.ok(apiResponse);
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<ApiResponse<CourseDto>> createCourse(@Valid @RequestBody CourseForm courseForm,
+    public ResponseEntity<ApiResponse<CourseDetailsDto>> createCourse(@Valid @RequestBody CourseForm courseForm,
                                                                HttpServletRequest request) {
         String userIdHeader = request.getHeader("X-User-Id");
         Long userId = Long.parseLong(userIdHeader);
 
-        CourseDto courseDto = courseService.createCourse(courseForm, userId);
-        ApiResponse<CourseDto> apiResponse = new ApiResponse<>("Курс успешно создан!",
-                courseDto);
+        CourseDetailsDto courseDetailsDto = courseService.createCourse(courseForm, userId);
+        ApiResponse<CourseDetailsDto> apiResponse = new ApiResponse<>("Курс успешно создан!",
+                courseDetailsDto);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -48,14 +59,16 @@ public class CourseController {
 
     @PatchMapping("/update/{courseId}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<ApiResponse<CourseDto>> updateCourse(@RequestBody @Valid CourseForm courseForm, @PathVariable String courseId,
+    public ResponseEntity<ApiResponse<CourseDetailsDto>> updateCourse(@RequestBody @Valid CourseForm courseForm, @PathVariable String courseId,
                                                                HttpServletRequest request) {
         String userIdHeader = request.getHeader("X-User-Id");
         Long userId = Long.parseLong(userIdHeader);
 
-        CourseDto courseDto = courseService.updateCourse(courseForm, courseId, userId);
+        System.out.println(courseForm.getIsPrivateCourse());
+        System.out.println(courseForm.getKeyword());
+        CourseDetailsDto courseDetailsDto = courseService.updateCourse(courseForm, courseId, userId);
 
-        ApiResponse<CourseDto> apiResponse = new ApiResponse<>("Курс успешно изменен!", courseDto);
+        ApiResponse<CourseDetailsDto> apiResponse = new ApiResponse<>("Курс успешно изменен!", courseDetailsDto);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -97,14 +110,16 @@ public class CourseController {
         return ResponseEntity.ok(new ApiResponse<>("Участники курса:", courseMembers));
     }
 
-//    @PostMapping("/join")
-//    @PreAuthorize("hasRole('STUDENT')")
-//    public ResponseEntity<ApiResponse<CourseDto>> joinCourse(@RequestBody JoinCourseDto joinCourseDto,
-//                                                             HttpServletRequest request) {
-//        String userIdHeader = request.getHeader("X-User-Id");
-//        Long userId = Long.parseLong(userIdHeader);
-//
-//
-//    }
+    @PostMapping("/join")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<ApiResponse<CourseDto>> joinCourse(@RequestBody JoinCourseDto joinCourseDto,
+                                                             HttpServletRequest request) {
+        String userIdHeader = request.getHeader("X-User-Id");
+        Long userId = Long.parseLong(userIdHeader);
+
+        CourseDto courseDto = courseService.joinCourse(joinCourseDto, userId);
+
+        return ResponseEntity.ok(new ApiResponse<>("Успешно присоединён к курсу", courseDto));
+    }
 
 }

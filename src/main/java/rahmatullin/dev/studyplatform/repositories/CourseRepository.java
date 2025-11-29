@@ -24,4 +24,7 @@ public interface CourseRepository extends JpaRepository<Course, String> {
     WHERE s.id IS NULL
     """)
     List<Course> findAvailableCoursesForStudent(@Param("studentId") Long studentId);
+
+    @Query("SELECT COUNT(c) > 0 FROM Course c JOIN c.courseMembers m WHERE c.id = :courseId AND m.id = :userId")
+    boolean existsByMemberId(@Param("courseId") String courseId, @Param("userId") Long userId);
 }

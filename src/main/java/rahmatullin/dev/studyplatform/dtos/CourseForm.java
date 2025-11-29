@@ -25,10 +25,10 @@ public class CourseForm {
     @Hidden
     @AssertTrue(message = "Поля isPrivateCourse и keyword должны быть указаны вместе или опущены вместе")
     public boolean isPrivateCourseAndKeywordConsistent() {
-        if (isPrivateCourse == null && keyword != null) {
+        if (((isPrivateCourse == false) || (isPrivateCourse == null)) && keyword != null) {
             return false;
         }
-        if (isPrivateCourse != null && keyword == null) {
+        if (((isPrivateCourse != false) || (isPrivateCourse == null)) && keyword == null) {
             return false;
         }
         return true;

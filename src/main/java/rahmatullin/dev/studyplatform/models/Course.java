@@ -37,6 +37,9 @@ public class Course {
     )
     private Set<User> courseMembers = new HashSet<>();
 
+    private Boolean isPrivateCourse;
+    private String keyword;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
