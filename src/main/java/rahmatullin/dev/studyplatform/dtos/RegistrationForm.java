@@ -24,6 +24,7 @@ public class RegistrationForm {
     private String firstName;
     @NotBlank(message = "Фамилия не может быть пустой")
     private String lastName;
-    @NotNull(message = "Роль не может быть пустым")
+
+    @NotNull(message = "Роль пользователя обязательна")
     private UserRoles role;
 }

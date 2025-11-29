@@ -35,7 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Long userId = jwtService.getUserId(accessToken);
                 String email = jwtService.getEmail(accessToken);
-                String role = jwtService.getRole(accessToken);
+
+                String role = jwtService.getUserRole(accessToken);
                 
                 if (userId != null && email != null) {
                     // Создаем wrapper для добавления заголовка X-User-Id
@@ -52,17 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authentication = new UsernamePasswordAuthenticationToken(
                             email,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority(authority))
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                         );
-                    } else {
-                        // Если роль отсутствует, устанавливаем аутентификацию без роли
-                        // @PreAuthorize отклонит запрос с 403, но это лучше, чем AuthenticationCredentialsNotFoundException
-                        authentication = new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            Collections.emptyList()
-                        );
-                    }
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                     
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     filterChain.doFilter(wrappedRequest, response);

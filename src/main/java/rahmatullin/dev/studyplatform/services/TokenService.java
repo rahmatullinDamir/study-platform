@@ -12,6 +12,7 @@ import rahmatullin.dev.studyplatform.exceptions.InvalidRefreshTokenException;
 import rahmatullin.dev.studyplatform.exceptions.UserNotFoundException;
 import rahmatullin.dev.studyplatform.mapper.UserMapper;
 import rahmatullin.dev.studyplatform.models.User;
+import rahmatullin.dev.studyplatform.models.enums.UserRoles;
 import rahmatullin.dev.studyplatform.repositories.UserRepository;
 import rahmatullin.dev.studyplatform.security.service.JwtService;
 
@@ -31,8 +32,8 @@ public class TokenService {
                 .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
         jwtService.equalsTokens(email, refreshToken);
 
-        Long userId = user.getId();
-        String role = user.getRole().name();
+        Long userId = userRepository.findIdByEmail(email);
+        UserRoles role = user.getRole();
 
         String newAccessToken = jwtService.generateAccessToken(email, userId, role);
         String newRefreshToken = jwtService.generateRefreshToken(email, userId, role);
@@ -44,12 +45,10 @@ public class TokenService {
     }
 
     public void setTokens(String email, HttpServletResponse response) {
+        Long userId = userRepository.findIdByEmail(email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Такой пользователь не найден"));
-        
-        Long userId = user.getId();
-        String role = user.getRole().name();
-
+        UserRoles role = user.getRole();
         String accessToken = jwtService.generateAccessToken(email, userId, role);
         String refreshToken = jwtService.generateRefreshToken(email, userId, role);
 
